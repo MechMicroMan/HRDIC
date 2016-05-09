@@ -182,6 +182,14 @@ def get_grain_labels(def_map, mask_file):
     grain_labels=measure.label(gb_binary)
     return grain_labels
 
+def show_grain_labels(grain_labels):
+    grain_boundaries=np.zeros(np.shape(grain_labels))
+    grain_boundaries[np.where(grain_labels==0)]=1
+    plt.imshow(grain_boundaries,cmap='binary')
+    measurements=measure.regionprops(grain_labels)
+    for grain in measurements:
+        plt.text(grain.centroid[1],grain.centroid[0],
+        '{:}'.format(grain.label))
 
 def get_grain(def_map,glabels,glabel):
     """Use grain labels to mask individual grains"""
