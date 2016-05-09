@@ -150,7 +150,7 @@ def sb_angle(shear_map,threshold=None,median_filter=None):
         shear_map_filt=shear_map
         strain_title='Shear strain: no threshold'
     
-    if median_filter in not None:    
+    if median_filter is not None:    
         shear_map_filt=medfilt(shear_map_filt,median_filter)
     
     sin_map = radon(shear_map_filt)
