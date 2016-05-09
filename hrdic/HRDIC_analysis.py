@@ -92,16 +92,16 @@ def plot_profile(def_map,start_point,end_point):
 
 
 
-def def_hist(def_map,strain_range=(),plot=False):
+def def_hist(def_map,values_range=(),plot=False):
     """ Create histogram from a deformation map """
-    if strain_range==():
+    if values_range==():
         xs=np.histogram(def_map.flatten(),bins=100,normed=1);
         if plot==True:
             plt.hist(def_map.flatten(),bins=100,normed=1);
     else:
-        xs=np.histogram(def_map.flatten(),bins=100,normed=1, range=strain_range);
+        xs=np.histogram(def_map.flatten(),bins=100,normed=1, range=values_range);
         if plot==True:
-            plt.hist(def_map.flatten(),bins=100,normed=1, range=strain_range);
+            plt.hist(def_map.flatten(),bins=100,normed=1, range=values_range);
     if plot is True:
         plt.xlabel('Deformation component');
         plt.ylabel('Normalized frequency');
@@ -115,7 +115,7 @@ def plot_hist_line(xs):
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
     plt.plot(xvals,yvals,'-o');
     plt.ylabel('Normalized frequency')
-    plt.xlabel('$\gamma_{max}$')
+    plt.xlabel('Map Values')
 
 def plot_hist_log(xs):
     """ Plot log(y) vs. x histogram using points and lines. """
@@ -123,7 +123,7 @@ def plot_hist_log(xs):
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
     plt.plot(xvals,yvals,'-o');
     plt.ylabel('Normalized frequency')
-    plt.xlabel('$\gamma_{max}$')
+    plt.xlabel('Map Values')
 
 def acorr_map(def_map,c_range=[]):
     """Calculate aoutocorrelation map for any deformation map"""
@@ -138,22 +138,22 @@ def acorr_map(def_map,c_range=[]):
     return corr_map
 
 
-def sb_angle(shear_map,threshold=None,median_filter=None):
+def sb_angle(def_map,threshold=None,median_filter=None):
     """Uses Radon transform to calculate alignment of slip lines
     Returns profile of max intensity of the sinogram in degrees. 
     Threshold can be used to filter data.
     """
     if threshold is not None:
-        shear_map_filt=shear_map>threshold
+        def_map_filt=def_map>threshold
         strain_title='Threshold: {:2.3f}'.format(threshold)
     else:
-        shear_map_filt=shear_map
-        strain_title='Shear strain: no threshold'
+        def_map_filt=def_map
+        strain_title='Deformation map: no threshold'
     
     if median_filter is not None:    
-        shear_map_filt=medfilt(shear_map_filt,median_filter)
+        def_map_filt=medfilt(def_map_filt,median_filter)
     
-    sin_map = radon(shear_map_filt)
+    sin_map = radon(def_map_filt)
     profile_filt=np.max(sin_map,axis=0)
     
     plt.figure(figsize=(13,5))
@@ -161,7 +161,7 @@ def sb_angle(shear_map,threshold=None,median_filter=None):
     ax0=plt.subplot(gs[0])
     ax1=plt.subplot(gs[1])
     ax2=plt.subplot(gs[2])
-    ax0.imshow(shear_map_filt,cmap='viridis')
+    ax0.imshow(def_map_filt,cmap='viridis')
     
     ax0.set_title(strain_title)
     ax1.imshow(sin_map,cmap='viridis')
@@ -177,7 +177,7 @@ def get_grain_labels(def_map, mask_file):
     """Create grain labels from an image mask file"""
     mask_im=io.imread(mask_file)
     mask_im=color.rgb2gray(mask_im)
-    gb_resized=resize(gb,np.shape(def_map))
+    gb_resized=resize(mask_im,np.shape(def_map))
     gb_binary=(gb_resized<1)
     grain_labels=measure.label(gb_binary)
     return grain_labels
