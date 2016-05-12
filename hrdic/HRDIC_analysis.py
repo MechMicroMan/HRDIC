@@ -92,16 +92,16 @@ def plot_profile(def_map,start_point,end_point):
 
 
 
-def def_hist(def_map,values_range=(),plot=False):
+def def_hist(def_map,values_range=(),nbins=100,plot=False):
     """ Create histogram from a deformation map """
     if values_range==():
-        xs=np.histogram(def_map.flatten(),bins=100,normed=1);
+        xs=np.histogram(def_map.flatten(),bins=nbins,normed=1);
         if plot==True:
-            plt.hist(def_map.flatten(),bins=100,normed=1);
+            plt.hist(def_map.flatten(),bins=nbins,normed=1);
     else:
-        xs=np.histogram(def_map.flatten(),bins=100,normed=1, range=values_range);
+        xs=np.histogram(def_map.flatten(),bins=nbins,normed=1, range=values_range);
         if plot==True:
-            plt.hist(def_map.flatten(),bins=100,normed=1, range=values_range);
+            plt.hist(def_map.flatten(),bins=nbins,normed=1, range=values_range);
     if plot is True:
         plt.xlabel('Deformation component');
         plt.ylabel('Normalized frequency');
@@ -113,7 +113,7 @@ def plot_hist_line(xs):
     """ Plot histogram using points and lines"""
     yvals=xs[0]
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
-    plt.plot(xvals,yvals,'-o');
+    plt.plot(xvals,yvals,'o');
     plt.ylabel('Normalized frequency')
     plt.xlabel('Map Values')
 
@@ -121,7 +121,7 @@ def plot_hist_log(xs):
     """ Plot log(y) vs. x histogram using points and lines. """
     yvals=np.log(xs[0])
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
-    plt.plot(xvals,yvals,'-o');
+    plt.plot(xvals,yvals,'o');
     plt.ylabel('ln(Normalized frequency)')
     plt.xlabel('Map Values')
     
@@ -129,7 +129,7 @@ def plot_hist_log10(xs):
     """ Plot log(y) vs. x histogram using points and lines. """
     yvals=np.log10(xs[0])
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
-    plt.plot(xvals,yvals,'-o');
+    plt.plot(xvals,yvals,'o');
     plt.ylabel('log(Normalized frequency)')
     plt.xlabel('Map Values')
 
