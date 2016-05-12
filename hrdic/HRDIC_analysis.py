@@ -122,7 +122,15 @@ def plot_hist_log(xs):
     yvals=np.log(xs[0])
     xvals=0.5*(xs[1][1:]+xs[1][:-1])
     plt.plot(xvals,yvals,'-o');
-    plt.ylabel('Normalized frequency')
+    plt.ylabel('ln(Normalized frequency)')
+    plt.xlabel('Map Values')
+    
+def plot_hist_log10(xs):
+    """ Plot log(y) vs. x histogram using points and lines. """
+    yvals=np.log10(xs[0])
+    xvals=0.5*(xs[1][1:]+xs[1][:-1])
+    plt.plot(xvals,yvals,'-o');
+    plt.ylabel('log(Normalized frequency)')
     plt.xlabel('Map Values')
 
 def acorr_map(def_map,c_range=[]):
