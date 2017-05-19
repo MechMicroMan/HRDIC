@@ -10,6 +10,7 @@ from scipy.signal import medfilt
 
 
 
+
 class DeformationMap():
     """ A class for importing Davis displacement data with 
     methods for returning deformation maps
@@ -56,7 +57,62 @@ class DeformationMap():
         grad_step=min(abs((np.diff(self.xc))))
         data_grad=np.gradient(data_map,grad_step,grad_step)
         return data_grad
+    
+class DeformationMapFast():
+    """ A class for importing Davis displacement data with 
+    methods for returning deformation maps. This is the fast
+    version, which reads the python binary file from the data.
+    Use davis_text_to_bin(fname) to create binary file.
+    
+    Requires: path and filename
+    Returns: a deformation map object
+    
+    Usage:
+    
+    deformation_map=deformation_map('path','filename')
+    
+    """
+    
+    def __init__(self,path,fname) :
+        
+        self.path=path
+        self.fname=fname
+        self.data=np.load(self.path+self.fname)
+        self.xc=self.data[:,0] #x coordinates
+        self.yc=self.data[:,1] #y coordinates
+        self.xd=self.data[:,2] #x displacement
+        self.yd=self.data[:,3] #y displacement
+        
+        self.xdim=(self.xc.max()-self.xc.min()
+                  )/min(abs((np.diff(self.xc))))+1 #size of map along x
+        self.ydim=(self.yc.max()-self.yc.min()
+                  )/max(abs((np.diff(self.yc))))+1 #size of map along y
+        self.x_map=self._map(self.xd,self.ydim,self.xdim) #u (displacement component along x) 
+        self.y_map=self._map(self.yd,self.ydim,self.xdim) #v (displacement component along x) 
+        self.f11=self._grad(self.x_map)[1]#f11
+        self.f22=self._grad(self.y_map)[0]#f22
+        self.f12=self._grad(self.x_map)[0]#f12
+        self.f21=self._grad(self.y_map)[1]#f21
+        
+        self.max_shear=np.sqrt((((self.f11-self.f22)/2.)**2)
+                               + ((self.f12+self.f21)/2.)**2)# max shear component
+        self.mapshape=np.shape(self.max_shear)
+        
+    def _map(self,data_col,ydim,xdim):
+        data_map=np.reshape(np.array(data_col),(int(ydim),int(xdim)))
+        return data_map
+    
+    def _grad(self,data_map):
+        grad_step=min(abs((np.diff(self.xc))))
+        data_grad=np.gradient(data_map,grad_step,grad_step)
+        return data_grad
 
+def davis_text_to_bin(fname):
+    data=np.loadtxt(fname,skiprows=1)
+    fname_out=fname[:-4]
+    np.save(fname_out,data)
+    print('Created file {:s}.npy.\n'.format(fname_out))
+    
 def strain_map_step(xdmap,ydmap,step):
     """
     Data coarsening
@@ -90,8 +146,6 @@ def plot_profile(def_map,start_point,end_point):
     ax1.axis('tight')
 
 
-
-
 def def_hist(def_map,values_range=(),nbins=100,plot=False):
     """ Create histogram from a deformation map """
     if values_range==():
@@ -106,7 +160,6 @@ def def_hist(def_map,values_range=(),nbins=100,plot=False):
         plt.xlabel('Deformation component');
         plt.ylabel('Normalized frequency');
     return(xs)
-
 
 
 def plot_hist_line(xs):
@@ -193,6 +246,15 @@ def get_grain_labels(def_map, mask_file):
 def show_grain_labels(grain_labels):
     grain_boundaries=np.zeros(np.shape(grain_labels))
     grain_boundaries[np.where(grain_labels==0)]=1
+    plt.imshow(grain_boundaries,cmap='binary')
+    measurements=measure.regionprops(grain_labels)
+    for grain in measurements:
+        plt.text(grain.centroid[1],grain.centroid[0],
+        '{:}'.format(grain.label))
+        
+def show_grain_labels2(grain_labels):
+    grain_boundaries=np.zeros(np.shape(grain_labels))
+    grain_boundaries[np.where(grain_labels==0)]=0
     plt.imshow(grain_boundaries,cmap='binary')
     measurements=measure.regionprops(grain_labels)
     for grain in measurements:
